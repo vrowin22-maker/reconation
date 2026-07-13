@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>RecoNation - My Liked</title>
+</head>
+<body>
+    <h1>RecoNation</h1>
+    <div style="text-align:center; margin-bottom:10px;">
+    <a href="/" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">🔍 Search</a>
+</div>
+    <p class="subtitle">My List Items</p>
+    <a class="search-again" href="/">Search again</a>
+
+    <div style="display:flex; justify-content:center; gap:15px; margin:20px;">
+        <button class="tab-btn active" onclick="showTab('movie')">🎬 Movies</button>
+        <button class="tab-btn" onclick="showTab('anime')">🎌 Anime</button>
+        <button class="tab-btn" onclick="showTab('song')">🎵 Songs</button>
+    </div>
+
+    <div id="tab-movie" class="results-grid">
+        {% for item in items if item.category == 'movie' %}
+            <div class="card">
+                {% if item.image %}<img src="{{ item.image }}" alt="{{ item.title }}">{% endif %}
+                <h3>{{ item.title }}</h3>
+                <p>Rating: {{ item.rating }}</p>
+                <p>Year: {{ item.year }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="tab-anime" class="results-grid" style="display:none;">
+        {% for item in items if item.category == 'anime' %}
+            <div class="card">
+                {% if item.image %}<img src="{{ item.image }}" alt="{{ item.title }}">{% endif %}
+                <h3>{{ item.title }}</h3>
+                <p>Score: {{ item.score }}</p>
+                <p>Episodes: {{ item.episodes }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="tab-song" class="results-grid" style="display:none;">
+        {% for item in items if item.category == 'song' %}
+            <div class="card">
+                {% if item.image %}<img src="{{ item.image }}" alt="{{ item.title }}">{% endif %}
+                <h3>{{ item.title }}</h3>
+                <p>Artist: {{ item.artist }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if items|length == 0 %}
+    <div style="text-align:center; margin-top:80px;">
+        <p style="font-size:4rem;">💔</p>
+        <p style="color:#ffd93d; font-size:1.5rem; font-weight:bold; margin-top:15px;">Nothing liked yet!</p>
+        <p style="color:#aaaaaa; margin-top:10px;">Go search something and start liking!</p>
+    </div>
+    {% endif %}
+
+    <script>
+    function showTab(tab) {
+        document.getElementById('tab-movie').style.display = 'none';
+        document.getElementById('tab-anime').style.display = 'none';
+        document.getElementById('tab-song').style.display = 'none';
+        document.getElementById('tab-' + tab).style.display = 'grid';
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+    </script>
+</body>
+</html>

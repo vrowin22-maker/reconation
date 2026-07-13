@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>RecoNation</title>
+</head>
+
+<body>
+    <h1>RecoNation</h1>
+<div style="text-align:center; margin-bottom:10px;">
+    <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">❤️ My List</a>
+</div>
+    <form action="/recommend" method="POST"> 
+        <!-- when submitted, send data to the /recommend route-->
+         <!--method="POST" — means we're sending data (not just visiting a page)-->
+        <select name="category">
+          <option value="movie">Movie</option>
+          <option value="anime">Anime</option>
+          <option value="song">Song</option>
+        </select>
+        <input type="text" name="query" placeholder="Enter a title...">
+        <small>Tip: For better song results, try "Song - Artist" (e.g. Rain - Pay Money To My Pain)</small>
+          <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
+          <!--The Search button. When clicked it submits the form.-->
+    </form>
+
+    <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; max-width:500px; left:50%; transform:translateX(-50%); z-index:100;"></div>
+
+<script>
+    const input = document.querySelector('input[name="query"]');
+    const select = document.querySelector('select[name="category"]');
+    const box = document.getElementById('suggestions-box');
+    let timeout = null;
+
+    input.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(async () => {
+            const query = input.value;
+            const category = select.value;
+
+            if (query.length < 3) {
+                box.style.display = 'none';
+                return;
+            }
+
+            const res = await fetch(`/suggest?query=${encodeURIComponent(query)}&category=${category}`);
+            const data = await res.json();
+
+            if (data.suggestions.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.innerHTML = data.suggestions.map(s => 
+                `<div onclick="selectSuggestion('${s.replace(/'/g, "\\'")}')" style="padding:10px 15px; cursor:pointer; color:white; border-bottom:1px solid #333;">${s}</div>`
+            ).join('');
+            box.style.display = 'block';
+        }, 300);
+    });
+
+    function selectSuggestion(value) {
+        input.value = value;
+        box.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!box.contains(e.target) && e.target !== input) {
+            box.style.display = 'none';
+        }
+    });
+</script>
+<div id="loader" style="display:none; text-align:center; margin-top:50px;">
+    <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
+    <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
+</div>
+</body>
+</html>
+
+
+<!--<Select> creates a dropdown,These are called HTML elements -->
+
+<!--<h1> → big heading
+<p> → paragraph of text
+<button> → a button
+<input> → a text box
+<select> → a dropdown
+<img> → an image
+<a> → a link-->
+
+<!--Every HTML need an opening and closing tags-->
+
+<!--type="text" — tells the browser what kind of input it is. Text means a normal text box. Could also be type="password" for a password box, type="number" for numbers only etc.
+name="query" — this is the label Flask uses to get the value. So when you type "Naruto" and click Search, Flask receives query = "Naruto"
+placeholder="Enter a title..." — the grey hint text you see inside the box before you type anything. Just for guidance, disappears when you start typing-->

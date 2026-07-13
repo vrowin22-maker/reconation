@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>RecoNation</title>
+</head>
+<body>
+    <h1>RecoNation</h1>
+    <div style="text-align:center; margin-bottom:10px;">
+    <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">My List</a>
+</div>
+    <p class="subtitle">Results for "{{ query }}"</p>
+    <a class="search-again" href="/">Search again</a>
+
+    {% if results|length == 0 %}
+    <div style="text-align:center; margin-top:80px;">
+        <p style="font-size:4rem;">🤔</p>
+        <p style="color:#ffd93d; font-size:1.5rem; font-weight:bold; margin-top:15px;">Hmm, nothing found!</p>
+        <p style="color:#aaaaaa; margin-top:10px;">Try searching something else or check your spelling.</p>
+    </div>
+    {% endif %}
+
+    <div class="results-grid">
+        {% for item in results %}
+            <div class="card">
+                {% if category == 'movie' %}
+                   <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}">
+                   <h3><a href="/recommend?category=movie&query={{ item.title }}" style="color:#ffd93d; text-decoration:none;">{{ item.title }}</a></h3>
+                   <p>Rating: {{ item.vote_average }}/10</p>
+                   <p>Year: {{ item.release_date[:4] }}</p>
+                   <p>{{ item.overview }}</p>
+                   <button class="like-btn" onclick="likeItem('movie', '{{ item.title }}', '{{ item.vote_average }}', '{{ item.release_date[:4] }}', 'https://image.tmdb.org/t/p/w200{{ item.poster_path }}')">❤️</button>
+
+                {% elif category == 'anime' %}
+                   {% if item.coverImage %}
+                       <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}">
+                   {% endif %}
+                   <h3><a href="/recommend?category=anime&query={{ item.title.romaji }}" style="color:#ffd93d; text-decoration:none;">{{ item.title.romaji }}</a></h3>
+                   <p>Score: {{ item.averageScore }}</p>
+                   <p>Episodes: {{ item.episodes }}</p>
+                   <p>Genres: {{ item.genres | join(', ') }}</p>
+                   <p>{{ item.description | striptags | truncate(150) }}</p>
+                   <button class="like-btn" onclick="likeItem('anime', '{{ item.title.romaji }}', '{{ item.averageScore }}', '{{ item.episodes }}', '{{ item.coverImage.large if item.coverImage else "" }}')">❤️</button>
+
+                {% elif category == 'song' %}
+                   {% if item.cover %}
+                       <img src="{{ item.cover }}" alt="{{ item.name }}">
+                   {% endif %}
+                   <h3><a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}" style="color:#ffd93d; text-decoration:none;">{{ item.name }}</a></h3>
+                   <p>Artist: {{ item.artist.name }}</p>
+                   <p>Match: {{ (item.match | float * 100) | round(1) }}%</p>
+                   {% if item.preview %}
+                       <audio controls>
+                           <source src="{{ item.preview }}" type="audio/mpeg">
+                       </audio>
+                   {% endif %}
+                   <a href="{{ item.url }}" target="_blank">Listen on Last.fm</a>
+                   <button class="like-btn" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '{{ item.cover if item.cover else "" }}')">❤️</button>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="loader" style="display:none; text-align:center; margin-top:50px;">
+        <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
+        <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
+    </div>
+
+    <script>
+    async function likeItem(category, title, extra1, extra2, image) {
+        const item = { category, title, image };
+        if (category === 'movie') { item.rating = extra1; item.year = extra2; }
+        if (category === 'anime') { item.score = extra1; item.episodes = extra2; }
+        if (category === 'song') { item.artist = extra1; }
+        
+        await fetch('/like', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(item)
+        });
+        alert('Added to liked! ❤️');
+    }
+
+    document.querySelectorAll('.card a[href^="/recommend"]').forEach(link => {
+        link.addEventListener('click', () => {
+            document.getElementById('loader').style.display = 'block';
+        });
+    });
+    </script>
+</body>
+</html>
