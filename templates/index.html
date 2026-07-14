@@ -4,117 +4,621 @@
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RecoNation</title>
+    <style>
+        .sleek-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            border-radius: 2px;
+            background: #333;
+            outline: none;
+            margin: 10px 0;
+            transition: background 0.2s;
+        }
+        .sleek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffd93d;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 0 10px rgba(255, 217, 61, 0.3);
+        }
+        .sleek-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .sleek-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffd93d;
+            cursor: pointer;
+            border: none;
+        }
+        .search-box {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid #2a2a3e;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            flex: 1;
+        }
+        .search-box input, .search-box select {
+            background: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        .search-box input:focus, .search-box select:focus {
+            outline: none;
+            border-color: #ffd93d;
+        }
+        .search-box button {
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d);
+            color: #0f0f0f;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .search-box button:hover {
+            opacity: 0.85;
+        }
+        .slider-container {
+            margin: 8px 0 12px;
+        }
+        .slider-value-display {
+            text-align: center;
+            color: #ffd93d;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .auth-links {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #2a2a3e;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .auth-links a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .auth-links a:hover {
+            color: #ffd93d;
+        }
+        .auth-links .welcome {
+            color: #888;
+            font-size: 0.8rem;
+        }
+        .auth-links .mylist {
+            color: #ffd93d;
+            border: 1px solid #ffd93d;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+        .auth-links .mylist:hover {
+            background: #ffd93d;
+            color: #1a1a2e;
+        }
+        .auth-links .logout {
+            color: #e50914;
+            border: 1px solid #e50914;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+        .auth-links .logout:hover {
+            background: #e50914;
+            color: #fff;
+        }
+        .auth-links .login-link {
+            color: #ffd93d;
+            border: 1px solid #ffd93d;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+        .auth-links .login-link:hover {
+            background: #ffd93d;
+            color: #1a1a2e;
+        }
+        .auth-links .register-link {
+            color: #aaa;
+            border: 1px solid #aaa;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+        .auth-links .register-link:hover {
+            background: #aaa;
+            color: #1a1a2e;
+        }
+
+        /* ===== SUGGESTIONS ===== */
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        #suggestions-box {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #1e1e2e;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+        #suggestions-box .suggestion-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            color: #ddd;
+            border-bottom: 1px solid #2a2a3e;
+            transition: background 0.2s;
+            font-size: 0.85rem;
+        }
+        #suggestions-box .suggestion-item:hover {
+            background: #2a2a3e;
+        }
+        #suggestions-box .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        #suggestions-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        #suggestions-box::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        #suggestions-box::-webkit-scrollbar-thumb {
+            background: #ffd93d;
+            border-radius: 4px;
+        }
+
+        /* ===== VIBE MATCH ===== */
+        .vibe-box {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #2a2a3e;
+            flex: 1;
+        }
+        .vibe-box .vibe-title {
+            color: #ffd93d;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .vibe-box .vibe-title span {
+            color: #666;
+            font-weight: 400;
+            font-size: 0.7rem;
+        }
+        .vibe-box input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1e1e2e;
+            color: white;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        .vibe-box input[type="text"]:focus {
+            outline: none;
+            border-color: #ffd93d;
+        }
+        .vibe-box .vibe-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .vibe-box .vibe-row select {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1e1e2e;
+            color: white;
+            font-size: 0.85rem;
+        }
+        .vibe-box .vibe-row select:focus {
+            outline: none;
+            border-color: #ffd93d;
+        }
+        .vibe-box .vibe-row .arrow {
+            color: #444;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .vibe-box .vibe-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(90deg, #6bcb77, #4ecdc4);
+            color: #0f0f0f;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .vibe-box .vibe-btn:hover {
+            opacity: 0.85;
+        }
+        .vibe-box .vibe-hint {
+            color: #555;
+            font-size: 0.65rem;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        /* ===== SIDE BY SIDE LAYOUT ===== */
+        .main-row {
+            display: flex;
+            gap: 20px;
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 0 20px;
+            align-items: stretch;
+        }
+        .main-row .search-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+        .main-row .vibe-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ===== CAROUSEL ===== */
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 30px 20px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-card {
+            min-width: 150px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+        .carousel-card:hover {
+            transform: scale(1.05);
+        }
+        .carousel-card img {
+            width: 150px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .carousel-card p {
+            color: white;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+        .carousel-card a {
+            text-decoration: none;
+        }
+        .like-btn {
+            background: transparent;
+            border: 1px solid #e50914;
+            color: #e50914;
+            border-radius: 8px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.3s;
+            letter-spacing: 0.3px;
+        }
+        .like-btn:hover {
+            background: #e50914;
+            color: white;
+        }
+        #loader {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loader div {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #333;
+            border-top: 5px solid #ffd93d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        #loader p {
+            color: #aaaaaa;
+            margin-top: 15px;
+        }
+        .section-title {
+            text-align: center;
+            color: #ffd93d;
+            margin: 40px 0 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .main-row {
+                flex-direction: column;
+                gap: 16px;
+                padding: 0 16px;
+            }
+            .search-box {
+                margin: 0;
+            }
+            .vibe-box {
+                margin: 0;
+            }
+        }
+        @media (max-width: 600px) {
+            .carousel-card {
+                min-width: 120px;
+            }
+            .carousel-card img {
+                width: 120px;
+                height: 180px;
+            }
+            .search-box {
+                padding: 16px 18px;
+            }
+            .vibe-box {
+                padding: 14px 16px;
+            }
+            .section-title {
+                font-size: 1.1rem;
+                margin: 30px 0 10px;
+            }
+        }
+        @media (max-width: 400px) {
+            .carousel-card {
+                min-width: 100px;
+            }
+            .carousel-card img {
+                width: 100px;
+                height: 150px;
+            }
+            .vibe-box .vibe-row {
+                flex-direction: column;
+            }
+            .vibe-box .vibe-row .arrow {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>RecoNation</h1>
-    <div style="text-align:center; margin-bottom:10px;">
-        {% if current_user.is_authenticated %}
-            <span style="color:#aaaaaa; font-size:0.9rem;">Hi, {{ current_user.username }}!</span>
-            <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px; margin-left:10px;">My List</a>
-            <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.9rem; border:1px solid #e50914; padding:6px 15px; border-radius:20px; margin-left:10px;">Logout</a>
-        {% else %}
-            <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">Login</a>
-            <a href="/register" style="color:#aaaaaa; text-decoration:none; font-size:0.9rem; border:1px solid #aaaaaa; padding:6px 15px; border-radius:20px; margin-left:10px;">Register</a>
-        {% endif %}
+    <h1 style="text-align:center; font-size:2.5rem; padding:20px 0 5px; background:linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; letter-spacing:3px;">RecoNation</h1>
+
+    <!-- ===== AUTH LINKS ===== -->
+    <div style="text-align:center; margin-bottom:16px;">
+        <div style="display:inline-flex; gap:16px; align-items:center; flex-wrap:wrap; justify-content:center;">
+            {% if current_user.is_authenticated %}
+                <span style="color:#888; font-size:0.8rem;">{{ current_user.username }}</span>
+                <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.75rem; border:1px solid #ffd93d; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#ffd93d'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#ffd93d';">My List</a>
+                <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.75rem; border:1px solid #e50914; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#e50914'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#e50914';">Logout</a>
+            {% else %}
+                <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.75rem; border:1px solid #ffd93d; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#ffd93d'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#ffd93d';">Login</a>
+                <a href="/register" style="color:#aaa; text-decoration:none; font-size:0.75rem; border:1px solid #aaa; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#aaa'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">Register</a>
+            {% endif %}
+        </div>
     </div>
 
-    <div style="position:relative; max-width:500px; margin:0 auto;">
-        <form action="/recommend" method="POST">
-            <select name="category">
-                <option value="movie">Movie</option>
-                <option value="anime">Anime</option>
-                <option value="song">Song</option>
-            </select>
-            <input type="text" name="query" placeholder="Enter a title...">
-            <small>Tip: For better song results, try "Song - Artist" (e.g. Rain - Pay Money To My Pain)</small>
-            <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
-        </form>
-        <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; z-index:100;"></div>
+    <!-- ===== SIDE BY SIDE: SEARCH + VIBE MATCH ===== -->
+    <div class="main-row">
+        <!-- SEARCH -->
+        <div class="search-wrapper">
+            <div class="search-box" style="position:relative;">
+                <form action="/recommend" method="POST">
+                    <select name="category" style="margin-bottom:10px;">
+                        <option value="movie">Movie</option>
+                        <option value="anime">Anime</option>
+                        <option value="song">Song</option>
+                    </select>
+                    
+                    <div class="search-input-wrapper">
+                        <input type="text" name="query" placeholder="Enter a title..." required autocomplete="off">
+                        <div id="suggestions-box"></div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-value-display" id="popularityLabel">Popular Hits</div>
+                        <input type="range" 
+                               name="popularity" 
+                               id="popularitySlider" 
+                               class="sleek-slider"
+                               min="0" 
+                               max="100" 
+                               value="70">
+                    </div>
+                    
+                    <small style="color:#666; font-size:0.7rem; display:block; text-align:center; margin-bottom:10px; letter-spacing:0.3px;">Tip: For better song results, try "Song - Artist"</small>
+                    <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- VIBE MATCH -->
+        <div class="vibe-wrapper">
+            <div class="vibe-box">
+                <div class="vibe-title">Vibe Match <span>find songs that match the vibe</span></div>
+                <form action="/vibe_match" method="POST">
+                    <input type="text" name="query" placeholder="Enter a movie or anime...">
+                    <div class="vibe-row">
+                        <select name="source_type">
+                            <option value="movie">Movie</option>
+                            <option value="anime">Anime</option>
+                        </select>
+                        <span class="arrow">→</span>
+                        <select name="target_type">
+                            <option value="songs">Songs</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="vibe-btn">Find Vibe</button>
+                </form>
+                <div class="vibe-hint">movie or anime → songs with similar vibe</div>
+            </div>
+        </div>
     </div>
 
-    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Movies</h2>
+    <!-- ===== TRENDING MOVIES ===== -->
+    <h2 class="section-title">Trending Movies</h2>
     <div class="carousel">
         {% for item in movies %}
         <div class="carousel-card">
             <a href="/recommend?category=movie&query={{ item.title }}">
-                <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}">
-                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.title }}</p>
+                <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none'">
+                <p>{{ item.title }}</p>
             </a>
-            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('movie', '{{ item.title }}', '{{ item.vote_average }}', '{{ item.release_date[:4] }}', 'https://image.tmdb.org/t/p/w200{{ item.poster_path }}')">❤️</button>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('movie', '{{ item.title }}', '{{ item.vote_average }}', '{{ item.release_date[:4] }}', 'https://image.tmdb.org/t/p/w200{{ item.poster_path }}')">Like</button>
         </div>
         {% endfor %}
     </div>
 
-    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Anime</h2>
+    <!-- ===== TRENDING ANIME ===== -->
+    <h2 class="section-title">Trending Anime</h2>
     <div class="carousel">
         {% for item in anime %}
         <div class="carousel-card">
             <a href="/recommend?category=anime&query={{ item.title.romaji }}">
                 {% if item.coverImage %}
-                    <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}">
+                    <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}" loading="lazy" onerror="this.style.display='none'">
                 {% else %}
                     <div style="width:150px; height:220px; background:#1e1e2e; border-radius:10px; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#aaaaaa; font-size:0.8rem; text-align:center; padding:10px;">No Image</div>
                 {% endif %}
-                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.title.romaji }}</p>
+                <p>{{ item.title.romaji }}</p>
             </a>
-            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('anime', '{{ item.title.romaji }}', '', '', '{{ item.coverImage.large if item.coverImage else "" }}')">❤️</button>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('anime', '{{ item.title.romaji }}', '', '', '{{ item.coverImage.large if item.coverImage else "" }}')">Like</button>
         </div>
         {% endfor %}
     </div>
 
-    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Songs</h2>
+    <!-- ===== TRENDING SONGS ===== -->
+    <h2 class="section-title">Trending Songs</h2>
     <div class="carousel">
         {% for item in songs %}
         <div class="carousel-card">
             <a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}">
-                <img src="{{ item.image[2]['#text'] if item.image else '' }}" alt="{{ item.name }}" onerror="this.style.display='none'">
-                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.name }}</p>
-                <p style="font-size:0.7rem; color:#aaaaaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.artist.name }}</p>
+                <img src="{{ item.image[2]['#text'] if item.image else '' }}" alt="{{ item.name }}" loading="lazy" onerror="this.style.display='none'">
+                <p>{{ item.name }}</p>
+                <p style="font-size:0.65rem; color:#888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.artist.name }}</p>
             </a>
-            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '')">❤️</button>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '')">Like</button>
         </div>
         {% endfor %}
     </div>
 
+    <!-- ===== LOADER ===== -->
     <div id="loader" style="display:none; text-align:center; margin-top:50px;">
         <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
         <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
     </div>
 
     <script>
+    // ===== AUTOCOMPLETE =====
     const input = document.querySelector('input[name="query"]');
     const select = document.querySelector('select[name="category"]');
     const box = document.getElementById('suggestions-box');
     let timeout = null;
 
-    input.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(async () => {
-            const query = input.value;
+    if (input) {
+        input.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const query = this.value;
             const category = select.value;
-            if (query.length < 3) { box.style.display = 'none'; return; }
-            const res = await fetch(`/suggest?query=${encodeURIComponent(query)}&category=${category}`);
-            const data = await res.json();
-            if (data.suggestions.length === 0) { box.style.display = 'none'; return; }
-            box.innerHTML = data.suggestions.map(s => 
-                `<div onclick="selectSuggestion('${s.replace(/'/g, "\\'")}')" style="padding:10px 15px; cursor:pointer; color:white; border-bottom:1px solid #333;">${s}</div>`
-            ).join('');
-            box.style.display = 'block';
-        }, 150);
-    });
+            
+            if (query.length < 3) {
+                box.style.display = 'none';
+                return;
+            }
+            
+            timeout = setTimeout(async function() {
+                try {
+                    const res = await fetch(`/suggest?query=${encodeURIComponent(query)}&category=${category}`);
+                    const data = await res.json();
+                    
+                    if (!data.suggestions || data.suggestions.length === 0) {
+                        box.style.display = 'none';
+                        return;
+                    }
+                    
+                    box.innerHTML = data.suggestions.map(function(s) {
+                        return `<div class="suggestion-item" onclick="selectSuggestion('${s.replace(/'/g, "\\'")}')">${s}</div>`;
+                    }).join('');
+                    box.style.display = 'block';
+                } catch (e) {
+                    box.style.display = 'none';
+                }
+            }, 150);
+        });
+    }
 
     function selectSuggestion(value) {
         input.value = value;
         box.style.display = 'none';
     }
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', function(e) {
         if (!box.contains(e.target) && e.target !== input) {
             box.style.display = 'none';
         }
     });
 
+    // ===== LIKE =====
     async function likeItem(category, title, extra1, extra2, image) {
         const item = { category, title, image };
         if (category === 'movie') { item.rating = extra1; item.year = extra2; }
@@ -125,56 +629,41 @@
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(item)
         });
-        alert('Added to My List! ❤️');
+        alert('Added to My List');
     }
 
+    // ===== CAROUSEL AUTO-SCROLL =====
     const carousels = document.querySelectorAll('.carousel');
-    carousels.forEach(carousel => {
+    carousels.forEach(function(carousel) {
         let scrolling = true;
-        setInterval(() => {
-            if (scrolling) {
+        setInterval(function() {
+            if (scrolling && carousel.children.length > 0) {
                 carousel.scrollLeft += 1;
-                if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth) {
+                if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth - 2) {
                     carousel.scrollLeft = 0;
                 }
             }
         }, 20);
-        carousel.addEventListener('mouseenter', () => scrolling = false);
-        carousel.addEventListener('mouseleave', () => scrolling = true);
+        carousel.addEventListener('mouseenter', function() { scrolling = false; });
+        carousel.addEventListener('mouseleave', function() { scrolling = true; });
     });
-    </script>
 
-    <script>
-async function likeItem(category, title, extra1, extra2, image) {
-    const item = { category, title, image };
-    if (category === 'movie') { item.rating = extra1; item.year = extra2; }
-    if (category === 'anime') { item.score = extra1; item.episodes = extra2; }
-    if (category === 'song') { item.artist = extra1; }
-    
-    await fetch('/like', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(item)
-    });
-    alert('Added to My List! ❤️');
-}
-</script>
+    // ===== SLIDER =====
+    const slider = document.getElementById('popularitySlider');
+    const label = document.getElementById('popularityLabel');
+
+    if (slider && label) {
+        slider.addEventListener('input', function() {
+            const val = parseInt(this.value);
+            if (val <= 30) {
+                label.textContent = 'Deep Cuts';
+            } else if (val <= 60) {
+                label.textContent = 'Balanced';
+            } else {
+                label.textContent = 'Popular Hits';
+            }
+        });
+    }
+    </script>
 </body>
 </html>
-
-
-<!--<Select> creates a dropdown,These are called HTML elements -->
-
-<!--<h1> → big heading
-<p> → paragraph of text
-<button> → a button
-<input> → a text box
-<select> → a dropdown
-<img> → an image
-<a> → a link-->
-
-<!--Every HTML need an opening and closing tags-->
-
-<!--type="text" — tells the browser what kind of input it is. Text means a normal text box. Could also be type="password" for a password box, type="number" for numbers only etc.
-name="query" — this is the label Flask uses to get the value. So when you type "Naruto" and click Search, Flask receives query = "Naruto"
-placeholder="Enter a title..." — the grey hint text you see inside the box before you type anything. Just for guidance, disappears when you start typing-->
