@@ -1,20 +1,41 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request ,redirect
 import requests
 import time
 from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+import bcrypt
 
-load_dotenv()  # must be first!
+load_dotenv()
 
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
 
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'reconation_secret_123')
+
 client = MongoClient(os.getenv('MONGO_URI'))
 db = client['reconation']
 liked_collection = db['liked']
+users_collection = db['users']
 
-app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+class User(UserMixin):
+    def __init__(self, user_data):
+        self.id = str(user_data['_id'])
+        self.username = user_data['username']
+
+@login_manager.user_loader
+def load_user(user_id):
+    from bson.objectid import ObjectId
+    user_data = users_collection.find_one({'_id': ObjectId(user_id)})
+    if user_data:
+        return User(user_data)
+    return None
 
 @app.route('/')
 def home():
@@ -185,14 +206,17 @@ def suggest():
     return {'suggestions': suggestions}
 
 @app.route('/like', methods=['POST'])
+@login_required
 def like():
     item = request.json
+    item['user_id'] = current_user.id
     liked_collection.insert_one(item)
     return {'status': 'ok'}
 
 @app.route('/liked')
+@login_required
 def liked():
-    items = list(liked_collection.find({}, {'_id': 0}))
+    items = list(liked_collection.find({'user_id': current_user.id}, {'_id': 0}))
     return render_template('liked.html', items=items)
 
 @app.route('/trending')
@@ -227,6 +251,42 @@ def trending():
         print(f"Trending error: {e}")
     
     return render_template('trending.html', movies=movies, anime=anime)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if users_collection.find_one({'username': username}):
+            return render_template('register.html', error='Username already exists')
+        
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        users_collection.insert_one({'username': username, 'password': hashed})
+        return redirect('/login')
+    
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user_data = users_collection.find_one({'username': username})
+        if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data['password']):
+            login_user(User(user_data))
+            return redirect('/')
+        
+        return render_template('login.html', error='Invalid username or password')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)

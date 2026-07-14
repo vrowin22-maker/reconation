@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>RecoNation - Register</title>
+</head>
+<body>
+    <h1>RecoNation</h1>
+    <p class="subtitle">Create Account</p>
+
+    {% if error %}
+    <p style="color:#e50914; text-align:center;">{{ error }}</p>
+    {% endif %}
+
+    <form action="/register" method="POST">
+        <input type="text" name="username" placeholder="Choose a username" required>
+        <input type="password" name="password" placeholder="Choose a password" required>
+        <button type="submit">Create Account</button>
+    </form>
+
+    <p style="text-align:center; color:#aaaaaa; margin-top:15px;">
+        Already have an account? <a href="/login" style="color:#ffd93d;">Login</a>
+    </p>
+</body>
+</html>

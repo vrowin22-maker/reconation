@@ -373,3 +373,48 @@ small {
 .carousel-card a {
     text-decoration: none;
 }
+
+input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid #333;
+    background: #1e1e2e;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.3s;
+}
+
+input[type="password"]:focus {
+    border-color: #ffd93d;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    form {
+        padding: 0 15px;
+    }
+
+    .results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .carousel-card {
+        min-width: 120px;
+    }
+
+    .carousel-card img {
+        width: 120px;
+        height: 180px;
+    }
+
+    .card img {
+        height: 200px;
+    }
+}

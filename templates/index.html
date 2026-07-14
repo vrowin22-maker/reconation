@@ -10,11 +10,17 @@
 <body>
     <h1>RecoNation</h1>
 <div style="text-align:center; margin-bottom:10px;">
-    <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">❤️ My List</a>
+    {% if current_user.is_authenticated %}
+        <span style="color:#aaaaaa; font-size:0.9rem;">Hi, {{ current_user.username }}!</span>
+        <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px; margin-left:10px;">My List</a>
+        <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.9rem; border:1px solid #e50914; padding:6px 15px; border-radius:20px; margin-left:10px;">Logout</a>
+    {% else %}
+        <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">Login</a>
+        <a href="/register" style="color:#aaaaaa; text-decoration:none; font-size:0.9rem; border:1px solid #aaaaaa; padding:6px 15px; border-radius:20px; margin-left:10px;">Register</a>
+    {% endif %}
 </div>
+    <div style="position:relative; max-width:500px; margin:0 auto;">
     <form action="/recommend" method="POST"> 
-        <!-- when submitted, send data to the /recommend route-->
-         <!--method="POST" — means we're sending data (not just visiting a page)-->
         <select name="category">
           <option value="movie">Movie</option>
           <option value="anime">Anime</option>
@@ -22,9 +28,10 @@
         </select>
         <input type="text" name="query" placeholder="Enter a title...">
         <small>Tip: For better song results, try "Song - Artist" (e.g. Rain - Pay Money To My Pain)</small>
-          <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
-          <!--The Search button. When clicked it submits the form.-->
+        <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
     </form>
+    <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; z-index:100;"></div>
+</div>
     <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Movies</h2>
 <div class="carousel">
     {% for item in movies %}
@@ -53,8 +60,7 @@
 {% endfor %}
 </div>
 
-    <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; max-width:500px; left:50%; transform:translateX(-50%); z-index:100;"></div>
-
+    
 <script>
     const input = document.querySelector('input[name="query"]');
     const select = document.querySelector('select[name="category"]');
@@ -84,7 +90,7 @@
                 `<div onclick="selectSuggestion('${s.replace(/'/g, "\\'")}')" style="padding:10px 15px; cursor:pointer; color:white; border-bottom:1px solid #333;">${s}</div>`
             ).join('');
             box.style.display = 'block';
-        }, 300);
+        }, 150);
     });
 
     function selectSuggestion(value) {
