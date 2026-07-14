@@ -5,20 +5,42 @@ from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
 
-client = MongoClient(os.getenv('MONGO_URI'))
-db = client['reconation']
-liked_collection = db['liked']
-
-load_dotenv()
+load_dotenv()  # must be first!
 
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
+
+client = MongoClient(os.getenv('MONGO_URI'))
+db = client['reconation']
+liked_collection = db['liked']
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    movies = []
+    anime = []
+    try:
+        movie_url = f"https://api.themoviedb.org/3/trending/movie/week?api_key={TMDB_API_KEY}"
+        movie_res = requests.get(movie_url).json()
+        movies = movie_res.get('results', [])[:15]
+
+        anime_query = """
+        query {
+            Page(perPage: 15) {
+                media(sort: TRENDING_DESC, type: ANIME) {
+                    title { romaji }
+                    coverImage { large }
+                }
+            }
+        }
+        """
+        anime_res = requests.post('https://graphql.anilist.co', json={'query': anime_query}).json()
+        anime = anime_res['data']['Page']['media']
+    except Exception as e:
+        print(f"Home trending error: {e}")
+    
+    return render_template('index.html', movies=movies, anime=anime)
 
 @app.route('/recommend', methods=['GET', 'POST'])
 def recommend():
@@ -172,6 +194,39 @@ def like():
 def liked():
     items = list(liked_collection.find({}, {'_id': 0}))
     return render_template('liked.html', items=items)
+
+@app.route('/trending')
+def trending():
+    movies = []
+    anime = []
+    
+    try:
+        # Trending movies
+        movie_url = f"https://api.themoviedb.org/3/trending/movie/week?api_key={TMDB_API_KEY}"
+        movie_res = requests.get(movie_url).json()
+        movies = movie_res.get('results', [])[:12]
+        
+        # Trending anime
+        anime_query = """
+        query {
+            Page(perPage: 12) {
+                media(sort: TRENDING_DESC, type: ANIME) {
+                    title { romaji }
+                    coverImage { large }
+                    averageScore
+                    episodes
+                    genres
+                    description
+                }
+            }
+        }
+        """
+        anime_res = requests.post('https://graphql.anilist.co', json={'query': anime_query}).json()
+        anime = anime_res['data']['Page']['media']
+    except Exception as e:
+        print(f"Trending error: {e}")
+    
+    return render_template('trending.html', movies=movies, anime=anime)
 
 if __name__ == '__main__':
     app.run(debug=True)

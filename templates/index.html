@@ -25,6 +25,33 @@
           <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
           <!--The Search button. When clicked it submits the form.-->
     </form>
+    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Movies</h2>
+<div class="carousel">
+    {% for item in movies %}
+    <div class="carousel-card">
+        <a href="/recommend?category=movie&query={{ item.title }}">
+            <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}">
+            <p>{{ item.title }}</p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Anime</h2>
+<div class="carousel">
+    {% for item in anime %}
+<div class="carousel-card">
+    <a href="/recommend?category=anime&query={{ item.title.romaji }}">
+        {% if item.coverImage %}
+            <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}">
+        {% else %}
+            <div style="width:150px; height:220px; background:#1e1e2e; border-radius:10px; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#aaaaaa; font-size:0.8rem; text-align:center; padding:10px;">No Image</div>
+        {% endif %}
+        <p>{{ item.title.romaji }}</p>
+    </a>
+</div>
+{% endfor %}
+</div>
 
     <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; max-width:500px; left:50%; transform:translateX(-50%); z-index:100;"></div>
 
@@ -75,6 +102,24 @@
     <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
     <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
 </div>
+
+<script>
+    const carousels = document.querySelectorAll('.carousel');
+    carousels.forEach(carousel => {
+        let scrolling = true;
+        setInterval(() => {
+            if (scrolling) {
+                carousel.scrollLeft += 1;
+                if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth) {
+                    carousel.scrollLeft = 0;
+                }
+            }
+        }, 20);
+
+        carousel.addEventListener('mouseenter', () => scrolling = false);
+        carousel.addEventListener('mouseleave', () => scrolling = true);
+    });
+</script>
 </body>
 </html>
 

@@ -332,3 +332,44 @@ small {
     border-color: #ffd93d;
     color: #ffd93d;
 }
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 10px 30px 20px;
+    scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-card {
+    min-width: 150px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+}
+
+.carousel-card:hover {
+    transform: scale(1.05);
+}
+
+.carousel-card img {
+    width: 150px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.carousel-card p {
+    color: white;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.carousel-card a {
+    text-decoration: none;
+}
