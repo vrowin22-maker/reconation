@@ -41,6 +41,7 @@ def load_user(user_id):
 def home():
     movies = []
     anime = []
+    songs = []
     try:
         movie_url = f"https://api.themoviedb.org/3/trending/movie/week?api_key={TMDB_API_KEY}"
         movie_res = requests.get(movie_url).json()
@@ -58,10 +59,15 @@ def home():
         """
         anime_res = requests.post('https://graphql.anilist.co', json={'query': anime_query}).json()
         anime = anime_res['data']['Page']['media']
+
+        song_url = f"https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key={LASTFM_API_KEY}&format=json&limit=15"
+        song_res = requests.get(song_url).json()
+        songs = song_res.get('tracks', {}).get('track', [])
+
     except Exception as e:
         print(f"Home trending error: {e}")
     
-    return render_template('index.html', movies=movies, anime=anime)
+    return render_template('index.html', movies=movies, anime=anime, songs=songs)
 
 @app.route('/recommend', methods=['GET', 'POST'])
 def recommend():
@@ -287,6 +293,13 @@ def login():
 def logout():
     logout_user()
     return redirect('/')
+
+@app.route('/unlike', methods=['POST'])
+@login_required
+def unlike():
+    title = request.json.get('title')
+    liked_collection.delete_one({'user_id': current_user.id, 'title': title})
+    return {'status': 'ok'}
 
 if __name__ == '__main__':
     app.run(debug=True)

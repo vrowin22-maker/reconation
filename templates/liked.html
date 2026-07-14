@@ -4,20 +4,17 @@
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="UTF-8">
-    <title>RecoNation - My Liked</title>
+    <title>RecoNation - My List</title>
 </head>
 <body>
     <h1>RecoNation</h1>
-    <div style="text-align:center; margin-bottom:10px;">
-    <a href="/" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">🔍 Search</a>
-</div>
-    <p class="subtitle">My List Items</p>
+    <p class="subtitle">My List</p>
     <a class="search-again" href="/">Search again</a>
 
     <div style="display:flex; justify-content:center; gap:15px; margin:20px;">
-        <button class="tab-btn active" onclick="showTab('movie')">🎬 Movies</button>
-        <button class="tab-btn" onclick="showTab('anime')">🎌 Anime</button>
-        <button class="tab-btn" onclick="showTab('song')">🎵 Songs</button>
+        <button class="tab-btn active" onclick="showTab('movie', event)">Movies</button>
+        <button class="tab-btn" onclick="showTab('anime', event)">Anime</button>
+        <button class="tab-btn" onclick="showTab('song', event)">Songs</button>
     </div>
 
     <div id="tab-movie" class="results-grid">
@@ -27,6 +24,7 @@
                 <h3>{{ item.title }}</h3>
                 <p>Rating: {{ item.rating }}</p>
                 <p>Year: {{ item.year }}</p>
+                <button class="like-btn" onclick="removeItem('{{ item.title }}')">🗑️ Remove</button>
             </div>
         {% endfor %}
     </div>
@@ -38,6 +36,7 @@
                 <h3>{{ item.title }}</h3>
                 <p>Score: {{ item.score }}</p>
                 <p>Episodes: {{ item.episodes }}</p>
+                <button class="like-btn" onclick="removeItem('{{ item.title }}')">🗑️ Remove</button>
             </div>
         {% endfor %}
     </div>
@@ -48,6 +47,7 @@
                 {% if item.image %}<img src="{{ item.image }}" alt="{{ item.title }}">{% endif %}
                 <h3>{{ item.title }}</h3>
                 <p>Artist: {{ item.artist }}</p>
+                <button class="like-btn" onclick="removeItem('{{ item.title }}')">🗑️ Remove</button>
             </div>
         {% endfor %}
     </div>
@@ -61,13 +61,22 @@
     {% endif %}
 
     <script>
-    function showTab(tab) {
+    function showTab(tab, event) {
         document.getElementById('tab-movie').style.display = 'none';
         document.getElementById('tab-anime').style.display = 'none';
         document.getElementById('tab-song').style.display = 'none';
         document.getElementById('tab-' + tab).style.display = 'grid';
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
+    }
+
+    async function removeItem(title) {
+        await fetch('/unlike', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: title})
+        });
+        location.reload();
     }
     </script>
 </body>

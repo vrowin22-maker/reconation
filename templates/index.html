@@ -6,62 +6,83 @@
     <meta charset="UTF-8">
     <title>RecoNation</title>
 </head>
-
 <body>
     <h1>RecoNation</h1>
-<div style="text-align:center; margin-bottom:10px;">
-    {% if current_user.is_authenticated %}
-        <span style="color:#aaaaaa; font-size:0.9rem;">Hi, {{ current_user.username }}!</span>
-        <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px; margin-left:10px;">My List</a>
-        <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.9rem; border:1px solid #e50914; padding:6px 15px; border-radius:20px; margin-left:10px;">Logout</a>
-    {% else %}
-        <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">Login</a>
-        <a href="/register" style="color:#aaaaaa; text-decoration:none; font-size:0.9rem; border:1px solid #aaaaaa; padding:6px 15px; border-radius:20px; margin-left:10px;">Register</a>
-    {% endif %}
-</div>
-    <div style="position:relative; max-width:500px; margin:0 auto;">
-    <form action="/recommend" method="POST"> 
-        <select name="category">
-          <option value="movie">Movie</option>
-          <option value="anime">Anime</option>
-          <option value="song">Song</option>
-        </select>
-        <input type="text" name="query" placeholder="Enter a title...">
-        <small>Tip: For better song results, try "Song - Artist" (e.g. Rain - Pay Money To My Pain)</small>
-        <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
-    </form>
-    <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; z-index:100;"></div>
-</div>
-    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Movies</h2>
-<div class="carousel">
-    {% for item in movies %}
-    <div class="carousel-card">
-        <a href="/recommend?category=movie&query={{ item.title }}">
-            <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}">
-            <p>{{ item.title }}</p>
-        </a>
-    </div>
-    {% endfor %}
-</div>
-
-<h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Anime</h2>
-<div class="carousel">
-    {% for item in anime %}
-<div class="carousel-card">
-    <a href="/recommend?category=anime&query={{ item.title.romaji }}">
-        {% if item.coverImage %}
-            <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}">
+    <div style="text-align:center; margin-bottom:10px;">
+        {% if current_user.is_authenticated %}
+            <span style="color:#aaaaaa; font-size:0.9rem;">Hi, {{ current_user.username }}!</span>
+            <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px; margin-left:10px;">My List</a>
+            <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.9rem; border:1px solid #e50914; padding:6px 15px; border-radius:20px; margin-left:10px;">Logout</a>
         {% else %}
-            <div style="width:150px; height:220px; background:#1e1e2e; border-radius:10px; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#aaaaaa; font-size:0.8rem; text-align:center; padding:10px;">No Image</div>
+            <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.9rem; border:1px solid #ffd93d; padding:6px 15px; border-radius:20px;">Login</a>
+            <a href="/register" style="color:#aaaaaa; text-decoration:none; font-size:0.9rem; border:1px solid #aaaaaa; padding:6px 15px; border-radius:20px; margin-left:10px;">Register</a>
         {% endif %}
-        <p>{{ item.title.romaji }}</p>
-    </a>
-</div>
-{% endfor %}
-</div>
+    </div>
 
-    
-<script>
+    <div style="position:relative; max-width:500px; margin:0 auto;">
+        <form action="/recommend" method="POST">
+            <select name="category">
+                <option value="movie">Movie</option>
+                <option value="anime">Anime</option>
+                <option value="song">Song</option>
+            </select>
+            <input type="text" name="query" placeholder="Enter a title...">
+            <small>Tip: For better song results, try "Song - Artist" (e.g. Rain - Pay Money To My Pain)</small>
+            <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
+        </form>
+        <div id="suggestions-box" style="display:none; position:absolute; background:#1e1e2e; border-radius:8px; width:100%; z-index:100;"></div>
+    </div>
+
+    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Movies</h2>
+    <div class="carousel">
+        {% for item in movies %}
+        <div class="carousel-card">
+            <a href="/recommend?category=movie&query={{ item.title }}">
+                <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}">
+                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.title }}</p>
+            </a>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('movie', '{{ item.title }}', '{{ item.vote_average }}', '{{ item.release_date[:4] }}', 'https://image.tmdb.org/t/p/w200{{ item.poster_path }}')">❤️</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Anime</h2>
+    <div class="carousel">
+        {% for item in anime %}
+        <div class="carousel-card">
+            <a href="/recommend?category=anime&query={{ item.title.romaji }}">
+                {% if item.coverImage %}
+                    <img src="{{ item.coverImage.large }}" alt="{{ item.title.romaji }}">
+                {% else %}
+                    <div style="width:150px; height:220px; background:#1e1e2e; border-radius:10px; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#aaaaaa; font-size:0.8rem; text-align:center; padding:10px;">No Image</div>
+                {% endif %}
+                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.title.romaji }}</p>
+            </a>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('anime', '{{ item.title.romaji }}', '', '', '{{ item.coverImage.large if item.coverImage else "" }}')">❤️</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 style="text-align:center; color:#ffd93d; margin:40px 0 10px;">Trending Songs</h2>
+    <div class="carousel">
+        {% for item in songs %}
+        <div class="carousel-card">
+            <a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}">
+                <img src="{{ item.image[2]['#text'] if item.image else '' }}" alt="{{ item.name }}" onerror="this.style.display='none'">
+                <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.name }}</p>
+                <p style="font-size:0.7rem; color:#aaaaaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ item.artist.name }}</p>
+            </a>
+            <button class="like-btn" style="width:100%; margin-top:5px;" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '')">❤️</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="loader" style="display:none; text-align:center; margin-top:50px;">
+        <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
+        <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
+    </div>
+
+    <script>
     const input = document.querySelector('input[name="query"]');
     const select = document.querySelector('select[name="category"]');
     const box = document.getElementById('suggestions-box');
@@ -72,20 +93,10 @@
         timeout = setTimeout(async () => {
             const query = input.value;
             const category = select.value;
-
-            if (query.length < 3) {
-                box.style.display = 'none';
-                return;
-            }
-
+            if (query.length < 3) { box.style.display = 'none'; return; }
             const res = await fetch(`/suggest?query=${encodeURIComponent(query)}&category=${category}`);
             const data = await res.json();
-
-            if (data.suggestions.length === 0) {
-                box.style.display = 'none';
-                return;
-            }
-
+            if (data.suggestions.length === 0) { box.style.display = 'none'; return; }
             box.innerHTML = data.suggestions.map(s => 
                 `<div onclick="selectSuggestion('${s.replace(/'/g, "\\'")}')" style="padding:10px 15px; cursor:pointer; color:white; border-bottom:1px solid #333;">${s}</div>`
             ).join('');
@@ -103,13 +114,20 @@
             box.style.display = 'none';
         }
     });
-</script>
-<div id="loader" style="display:none; text-align:center; margin-top:50px;">
-    <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
-    <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
-</div>
 
-<script>
+    async function likeItem(category, title, extra1, extra2, image) {
+        const item = { category, title, image };
+        if (category === 'movie') { item.rating = extra1; item.year = extra2; }
+        if (category === 'anime') { item.score = extra1; item.episodes = extra2; }
+        if (category === 'song') { item.artist = extra1; }
+        await fetch('/like', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(item)
+        });
+        alert('Added to My List! ❤️');
+    }
+
     const carousels = document.querySelectorAll('.carousel');
     carousels.forEach(carousel => {
         let scrolling = true;
@@ -121,10 +139,25 @@
                 }
             }
         }, 20);
-
         carousel.addEventListener('mouseenter', () => scrolling = false);
         carousel.addEventListener('mouseleave', () => scrolling = true);
     });
+    </script>
+
+    <script>
+async function likeItem(category, title, extra1, extra2, image) {
+    const item = { category, title, image };
+    if (category === 'movie') { item.rating = extra1; item.year = extra2; }
+    if (category === 'anime') { item.score = extra1; item.episodes = extra2; }
+    if (category === 'song') { item.artist = extra1; }
+    
+    await fetch('/like', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(item)
+    });
+    alert('Added to My List! ❤️');
+}
 </script>
 </body>
 </html>
