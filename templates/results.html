@@ -45,24 +45,20 @@
                    <button class="like-btn" onclick="likeItem('anime', '{{ item.title.romaji }}', '{{ item.averageScore }}', '{{ item.episodes }}', '{{ item.coverImage.large if item.coverImage else "" }}')">❤️</button>
 
                 {% elif category == 'song' %}
-   <div class="card song-card" data-index="{{ loop.index0 }}">
-       {% if item.cover %}
-           <img src="{{ item.cover }}" alt="{{ item.name }}">
-       {% endif %}
-       <h3><a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}" style="color:#ffd93d; text-decoration:none;">{{ item.name }}</a></h3>
-       <p>Artist: {{ item.artist.name }}</p>
-       <p>Match: {{ (item.match | float * 100) | round(1) }}%</p>
-       {% if item.preview %}
-           <audio controls preload="none" class="song-audio" data-index="{{ loop.index0 }}">
-               <source src="{{ item.preview }}" type="audio/mpeg">
-           </audio>
-       {% else %}
-           <p style="color:#666; font-size:0.8rem;">No preview available</p>
-       {% endif %}
-       <a href="{{ item.url }}" target="_blank">Listen on Last.fm</a>
-       <button class="like-btn" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '{{ item.cover if item.cover else "" }}')">❤️</button>
-   </div>
-{% endif %}
+                   {% if item.cover %}
+                       <img src="{{ item.cover }}" alt="{{ item.name }}">
+                   {% endif %}
+                   <h3><a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}" style="color:#ffd93d; text-decoration:none;">{{ item.name }}</a></h3>
+                   <p>Artist: {{ item.artist.name }}</p>
+                   <p>Match: {{ (item.match | float * 100) | round(1) }}%</p>
+                   {% if item.preview %}
+                       <audio controls>
+                           <source src="{{ item.preview }}" type="audio/mpeg">
+                       </audio>
+                   {% endif %}
+                   <a href="{{ item.url }}" target="_blank">Listen on Last.fm</a>
+                   <button class="like-btn" onclick="likeItem('song', '{{ item.name }}', '{{ item.artist.name }}', '', '{{ item.cover if item.cover else "" }}')">❤️</button>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -93,176 +89,5 @@
         });
     });
     </script>
-
-    <script>
-// ==================== AUTO-PLAY SONG PREVIEWS ====================
-(function() {
-    console.log("🎵 Song auto-play script loaded!");
-    
-    // Get all song audio players
-    const audioPlayers = document.querySelectorAll('.song-audio');
-    console.log("Found", audioPlayers.length, "song previews");
-    
-    if (audioPlayers.length === 0) {
-        console.log("No song previews found!");
-        return;
-    }
-
-    let currentIndex = 0;
-
-    // Function to play next song
-    function playNext() {
-        // Stop all players
-        audioPlayers.forEach(player => {
-            player.pause();
-            player.currentTime = 0;
-        });
-
-        // Move to next song
-        currentIndex = (currentIndex + 1) % audioPlayers.length;
-        
-        // Play next song
-        const nextPlayer = audioPlayers[currentIndex];
-        if (nextPlayer) {
-            console.log("Playing song", currentIndex);
-            nextPlayer.play().catch(function(e) {
-                console.log("Can't play this song, skipping to next");
-                // Skip if can't play
-                setTimeout(playNext, 500);
-            });
-            
-            // Highlight current card
-            document.querySelectorAll('.song-card').forEach((card, i) => {
-                if (i === currentIndex) {
-                    card.style.border = '3px solid #4ecdc4';
-                    card.style.boxShadow = '0 0 30px rgba(78, 205, 196, 0.3)';
-                } else {
-                    card.style.border = '1px solid #333';
-                    card.style.boxShadow = 'none';
-                }
-            });
-        }
-    }
-
-    // Add event listener to each audio player
-    audioPlayers.forEach((player, index) => {
-        // When song ends, play next
-        player.addEventListener('ended', function() {
-            console.log("Song ended, playing next...");
-            setTimeout(playNext, 800);
-        });
-
-        // When user manually plays a song
-        player.addEventListener('play', function() {
-            console.log("User started playing song", index);
-            // Stop all other players
-            audioPlayers.forEach((otherPlayer, i) => {
-                if (i !== index) {
-                    otherPlayer.pause();
-                    otherPlayer.currentTime = 0;
-                }
-            });
-            currentIndex = index;
-            
-            // Highlight current card
-            document.querySelectorAll('.song-card').forEach((card, i) => {
-                if (i === index) {
-                    card.style.border = '3px solid #ffd93d';
-                    card.style.boxShadow = '0 0 30px rgba(255, 217, 61, 0.3)';
-                } else {
-                    card.style.border = '1px solid #333';
-                    card.style.boxShadow = 'none';
-                }
-            });
-        });
-    });
-
-    // ==================== ADD PLAY ALL BUTTON ====================
-    const playAllBtn = document.createElement('button');
-    playAllBtn.textContent = '▶️ Play All Songs';
-    playAllBtn.style.cssText = `
-        display: block;
-        margin: 20px auto;
-        padding: 12px 30px;
-        background: linear-gradient(90deg, #4ecdc4, #ffd93d);
-        color: #1a1a2e;
-        border: none;
-        border-radius: 25px;
-        font-weight: bold;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    `;
-    playAllBtn.onmouseover = function() {
-        this.style.transform = 'scale(1.05)';
-        this.style.boxShadow = '0 5px 20px rgba(78, 205, 196, 0.3)';
-    };
-    playAllBtn.onmouseout = function() {
-        this.style.transform = 'scale(1)';
-        this.style.boxShadow = 'none';
-    };
-
-    let isPlayingAll = false;
-
-    playAllBtn.onclick = function() {
-        if (!isPlayingAll) {
-            console.log("Playing all songs!");
-            currentIndex = -1;
-            playNext();
-            this.textContent = '⏹️ Stop All';
-            this.style.background = 'linear-gradient(90deg, #e50914, #ff6b6b)';
-            isPlayingAll = true;
-        } else {
-            console.log("Stopping all songs");
-            audioPlayers.forEach(player => {
-                player.pause();
-                player.currentTime = 0;
-            });
-            document.querySelectorAll('.song-card').forEach(card => {
-                card.style.border = '1px solid #333';
-                card.style.boxShadow = 'none';
-            });
-            this.textContent = '▶️ Play All Songs';
-            this.style.background = 'linear-gradient(90deg, #4ecdc4, #ffd93d)';
-            isPlayingAll = false;
-        }
-    };
-
-    // Insert button after the results grid
-    const resultsGrid = document.querySelector('.results-grid');
-    if (resultsGrid) {
-        resultsGrid.parentNode.insertBefore(playAllBtn, resultsGrid.nextSibling);
-        console.log("✅ Play All button added!");
-    }
-
-    // ==================== KEYBOARD SHORTCUTS ====================
-    document.addEventListener('keydown', function(e) {
-        // Space to play/pause
-        if (e.key === ' ' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-            if (audioPlayers.length > 0) {
-                const currentPlayer = audioPlayers[currentIndex];
-                if (currentPlayer) {
-                    if (currentPlayer.paused) {
-                        currentPlayer.play();
-                    } else {
-                        currentPlayer.pause();
-                    }
-                }
-            }
-        }
-        // Right arrow to skip
-        if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            if (audioPlayers.length > 0) {
-                playNext();
-            }
-        }
-    });
-
-    console.log("✅ Song auto-play ready!");
-    console.log("💡 Press SPACE to play/pause, → to skip to next song");
-})();
-</script>
 </body>
 </html>
