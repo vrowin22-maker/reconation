@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Results - RecoNation</title>
     <style>
-        /* ===== SPINNER OVERLAY ===== */
+        /* ===== FULL-SCREEN SPINNER OVERLAY ===== */
         #searchLoader {
             display: none;
             position: fixed;
@@ -284,7 +284,7 @@
     </style>
 </head>
 <body>
-    <!-- ===== SPINNER OVERLAY ===== -->
+    <!-- ===== FULL-SCREEN SPINNER OVERLAY ===== -->
     <div id="searchLoader">
         <div class="spinner"></div>
         <p>Finding recommendations...</p>
@@ -314,6 +314,7 @@
     <!-- ===== MINI SEARCH ===== -->
     <div class="mini-search">
         <form action="/recommend" method="POST" onsubmit="showLoader()">
+            <input type="hidden" name="popularity" value="{{ request.args.get('popularity') or request.form.get('popularity') or 70 }}">
             <select name="category">
                 <option value="movie" {% if category == 'movie' %}selected{% endif %}>Movie</option>
                 <option value="anime" {% if category == 'anime' %}selected{% endif %}>Anime</option>
@@ -339,7 +340,7 @@
             <div class="card">
                 {% if category == 'movie' %}
                     <img src="https://image.tmdb.org/t/p/w200{{ item.poster_path }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none'">
-                    <h3><a href="/recommend?category=movie&query={{ item.title }}" style="color:#ffd93d; text-decoration:none;">{{ item.title }}</a></h3>
+                    <h3><a href="/recommend?category=movie&query={{ item.title }}&popularity={{ request.args.get('popularity') or request.form.get('popularity') or 70 }}" style="color:#ffd93d; text-decoration:none;">{{ item.title }}</a></h3>
                     <p>⭐ {{ item.vote_average }}/10 • {{ item.release_date[:4] }}</p>
                     <p style="font-size:0.7rem; color:#888; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ item.overview }}</p>
                     <button class="like-btn" onclick="likeItem('movie', '{{ item.title }}', '{{ item.vote_average }}', '{{ item.release_date[:4] }}', 'https://image.tmdb.org/t/p/w200{{ item.poster_path }}')">❤️ Like</button>
@@ -350,7 +351,7 @@
                     {% else %}
                         <div style="height:180px; background:#1e1e2e; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#666; font-size:0.8rem;">No Image</div>
                     {% endif %}
-                    <h3><a href="/recommend?category=anime&query={{ item.title.romaji }}" style="color:#ffd93d; text-decoration:none;">{{ item.title.romaji }}</a></h3>
+                    <h3><a href="/recommend?category=anime&query={{ item.title.romaji }}&popularity={{ request.args.get('popularity') or request.form.get('popularity') or 70 }}" style="color:#ffd93d; text-decoration:none;">{{ item.title.romaji }}</a></h3>
                     <p>⭐ {{ item.averageScore }}/100 • {{ item.episodes }} eps</p>
                     <p style="font-size:0.65rem; color:#888;">{{ item.genres | join(', ') }}</p>
                     <button class="like-btn" onclick="likeItem('anime', '{{ item.title.romaji }}', '{{ item.averageScore }}', '{{ item.episodes }}', '{{ item.coverImage.large if item.coverImage else "" }}')">❤️ Like</button>
@@ -361,7 +362,7 @@
                     {% else %}
                         <div style="height:180px; background:#1e1e2e; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#666; font-size:0.8rem;">🎵</div>
                     {% endif %}
-                    <h3><a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}" style="color:#ffd93d; text-decoration:none;">{{ item.name }}</a></h3>
+                    <h3><a href="/recommend?category=song&query={{ item.name }} - {{ item.artist.name }}&popularity={{ request.args.get('popularity') or request.form.get('popularity') or 70 }}" style="color:#ffd93d; text-decoration:none;">{{ item.name }}</a></h3>
                     <p>🎤 {{ item.artist.name }}</p>
                     <p style="font-size:0.65rem; color:#888;">Match: {{ (item.match | float * 100) | round(1) }}%</p>
                     {% if item.preview %}
@@ -376,7 +377,7 @@
     </div>
 
     <script>
-    // ===== SHOW LOADER =====
+    // ===== SHOW FULL-SCREEN LOADER =====
     function showLoader() {
         document.getElementById('searchLoader').style.display = 'flex';
     }
@@ -395,8 +396,9 @@
         alert('Added to liked! ❤️');
     }
 
+    // When clicking on any recommendation link, show the FULL-SCREEN loader
     document.querySelectorAll('.card a[href^="/recommend"]').forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', function(e) {
             showLoader();
         });
     });
