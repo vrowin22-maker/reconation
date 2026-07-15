@@ -1,13 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RecoNation</title>
     <style>
+        /* ===== SPINNER OVERLAY ===== */
+        #searchLoader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        #searchLoader .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #2a2a3e;
+            border-top: 5px solid #ffd93d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        #searchLoader p {
+            color: #ffd93d;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        #searchLoader .sub-text {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .sleek-slider {
             -webkit-appearance: none;
             appearance: none;
@@ -41,6 +79,7 @@
             cursor: pointer;
             border: none;
         }
+
         .search-box {
             background: #1a1a2e;
             border-radius: 12px;
@@ -49,7 +88,6 @@
             max-width: 500px;
             margin: 0 auto;
             position: relative;
-            flex: 1;
         }
         .search-box input, .search-box select {
             background: #1e1e2e;
@@ -163,7 +201,6 @@
             color: #1a1a2e;
         }
 
-        /* ===== SUGGESTIONS ===== */
         .search-input-wrapper {
             position: relative;
             margin-bottom: 10px;
@@ -207,13 +244,16 @@
             border-radius: 4px;
         }
 
-        /* ===== VIBE MATCH ===== */
         .vibe-box {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .vibe-box .vibe-inner {
             background: #1a1a2e;
             border-radius: 12px;
             padding: 16px 20px;
             border: 1px solid #2a2a3e;
-            flex: 1;
         }
         .vibe-box .vibe-title {
             color: #ffd93d;
@@ -288,25 +328,6 @@
             text-align: center;
         }
 
-        /* ===== SIDE BY SIDE LAYOUT ===== */
-        .main-row {
-            display: flex;
-            gap: 20px;
-            max-width: 1020px;
-            margin: 0 auto;
-            padding: 0 20px;
-            align-items: stretch;
-        }
-        .main-row .search-wrapper {
-            flex: 1;
-            min-width: 0;
-        }
-        .main-row .vibe-wrapper {
-            flex: 1;
-            min-width: 0;
-        }
-
-        /* ===== CAROUSEL ===== */
         .carousel {
             display: flex;
             overflow-x: auto;
@@ -361,28 +382,7 @@
             background: #e50914;
             color: white;
         }
-        #loader {
-            display: none;
-            text-align: center;
-            margin-top: 50px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #loader div {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #333;
-            border-top: 5px solid #ffd93d;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        #loader p {
-            color: #aaaaaa;
-            margin-top: 15px;
-        }
+
         .section-title {
             text-align: center;
             color: #ffd93d;
@@ -392,20 +392,6 @@
             letter-spacing: 1px;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .main-row {
-                flex-direction: column;
-                gap: 16px;
-                padding: 0 16px;
-            }
-            .search-box {
-                margin: 0;
-            }
-            .vibe-box {
-                margin: 0;
-            }
-        }
         @media (max-width: 600px) {
             .carousel-card {
                 min-width: 120px;
@@ -415,10 +401,11 @@
                 height: 180px;
             }
             .search-box {
+                margin: 10px 16px;
                 padding: 16px 18px;
             }
             .vibe-box {
-                padding: 14px 16px;
+                margin: 10px 16px;
             }
             .section-title {
                 font-size: 1.1rem;
@@ -443,76 +430,77 @@
     </style>
 </head>
 <body>
+    <!-- ===== SPINNER OVERLAY ===== -->
+    <div id="searchLoader">
+        <div class="spinner"></div>
+        <p>Finding recommendations...</p>
+        <p class="sub-text">This may take a moment</p>
+    </div>
+
     <h1 style="text-align:center; font-size:2.5rem; padding:20px 0 5px; background:linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; letter-spacing:3px;">RecoNation</h1>
 
-    <!-- ===== AUTH LINKS ===== -->
-    <div style="text-align:center; margin-bottom:16px;">
-        <div style="display:inline-flex; gap:16px; align-items:center; flex-wrap:wrap; justify-content:center;">
-            {% if current_user.is_authenticated %}
-                <span style="color:#888; font-size:0.8rem;">{{ current_user.username }}</span>
-                <a href="/liked" style="color:#ffd93d; text-decoration:none; font-size:0.75rem; border:1px solid #ffd93d; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#ffd93d'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#ffd93d';">My List</a>
-                <a href="/logout" style="color:#e50914; text-decoration:none; font-size:0.75rem; border:1px solid #e50914; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#e50914'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#e50914';">Logout</a>
-            {% else %}
-                <a href="/login" style="color:#ffd93d; text-decoration:none; font-size:0.75rem; border:1px solid #ffd93d; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#ffd93d'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#ffd93d';">Login</a>
-                <a href="/register" style="color:#aaa; text-decoration:none; font-size:0.75rem; border:1px solid #aaa; padding:4px 16px; border-radius:20px; transition:all 0.3s;" onmouseover="this.style.background='#aaa'; this.style.color='#1a1a2e';" onmouseout="this.style.background='transparent'; this.style.color='#aaa';">Register</a>
-            {% endif %}
+    <!-- ===== SEARCH BOX ===== -->
+    <div style="position:relative; max-width:500px; margin:0 auto; padding:0 20px;">
+        <div class="search-box">
+            <div class="auth-links">
+                {% if current_user.is_authenticated %}
+                    <span class="welcome">{{ current_user.username }}</span>
+                    <a href="/liked" class="mylist">My List</a>
+                    <a href="/logout" class="logout">Logout</a>
+                {% else %}
+                    <a href="/login" class="login-link">Login</a>
+                    <a href="/register" class="register-link">Register</a>
+                {% endif %}
+            </div>
+
+            <form action="/recommend" method="POST" onsubmit="showLoader()">
+                <select name="category" style="margin-bottom:10px;">
+                    <option value="movie">Movie</option>
+                    <option value="anime">Anime</option>
+                    <option value="song">Song</option>
+                </select>
+                
+                <div class="search-input-wrapper">
+                    <input type="text" name="query" placeholder="Enter a title..." required autocomplete="off">
+                    <div id="suggestions-box"></div>
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-value-display" id="popularityLabel">Popular Hits</div>
+                    <input type="range" 
+                           name="popularity" 
+                           id="popularitySlider" 
+                           class="sleek-slider"
+                           min="0" 
+                           max="100" 
+                           value="70">
+                </div>
+                
+                <small style="color:#666; font-size:0.75rem; display:block; text-align:center; margin-bottom:10px; letter-spacing:0.3px;">Tip: For better song results, try "Song - Artist"</small>
+                <button type="submit">Search</button>
+            </form>
         </div>
     </div>
 
-    <!-- ===== SIDE BY SIDE: SEARCH + VIBE MATCH ===== -->
-    <div class="main-row">
-        <!-- SEARCH -->
-        <div class="search-wrapper">
-            <div class="search-box" style="position:relative;">
-                <form action="/recommend" method="POST">
-                    <select name="category" style="margin-bottom:10px;">
+    <!-- ===== VIBE MATCH ===== -->
+    <div class="vibe-box">
+        <div class="vibe-inner">
+            <div class="vibe-title">Vibe Match <span>find songs that match the vibe</span></div>
+            <form action="/vibe_match" method="POST" onsubmit="showLoader()">
+                <input type="text" name="query" placeholder="Enter a movie or anime...">
+                <div class="vibe-row">
+                    <select name="source_type">
                         <option value="movie">Movie</option>
                         <option value="anime">Anime</option>
-                        <option value="song">Song</option>
                     </select>
-                    
-                    <div class="search-input-wrapper">
-                        <input type="text" name="query" placeholder="Enter a title..." required autocomplete="off">
-                        <div id="suggestions-box"></div>
-                    </div>
-                    
-                    <div class="slider-container">
-                        <div class="slider-value-display" id="popularityLabel">Popular Hits</div>
-                        <input type="range" 
-                               name="popularity" 
-                               id="popularitySlider" 
-                               class="sleek-slider"
-                               min="0" 
-                               max="100" 
-                               value="70">
-                    </div>
-                    
-                    <small style="color:#666; font-size:0.7rem; display:block; text-align:center; margin-bottom:10px; letter-spacing:0.3px;">Tip: For better song results, try "Song - Artist"</small>
-                    <button type="submit" onclick="document.getElementById('loader').style.display='block'">Search</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- VIBE MATCH -->
-        <div class="vibe-wrapper">
-            <div class="vibe-box">
-                <div class="vibe-title">Vibe Match <span>find songs that match the vibe</span></div>
-                <form action="/vibe_match" method="POST">
-                    <input type="text" name="query" placeholder="Enter a movie or anime...">
-                    <div class="vibe-row">
-                        <select name="source_type">
-                            <option value="movie">Movie</option>
-                            <option value="anime">Anime</option>
-                        </select>
-                        <span class="arrow">→</span>
-                        <select name="target_type">
-                            <option value="songs">Songs</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="vibe-btn">Find Vibe</button>
-                </form>
-                <div class="vibe-hint">movie or anime → songs with similar vibe</div>
-            </div>
+                    <span class="arrow">→</span>
+                    <select name="target_type">
+                        <option value="songs">Songs</option>
+                    </select>
+                </div>
+                <button type="submit" class="vibe-btn">Find Vibe</button>
+            </form>
+            <div class="vibe-hint">movie or anime → songs with similar vibe</div>
         </div>
     </div>
 
@@ -563,13 +551,12 @@
         {% endfor %}
     </div>
 
-    <!-- ===== LOADER ===== -->
-    <div id="loader" style="display:none; text-align:center; margin-top:50px;">
-        <div style="width:50px; height:50px; border:5px solid #333; border-top:5px solid #ffd93d; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
-        <p style="color:#aaaaaa; margin-top:15px;">Finding recommendations...</p>
-    </div>
-
     <script>
+    // ===== SHOW LOADER =====
+    function showLoader() {
+        document.getElementById('searchLoader').style.display = 'flex';
+    }
+
     // ===== AUTOCOMPLETE =====
     const input = document.querySelector('input[name="query"]');
     const select = document.querySelector('select[name="category"]');
@@ -608,9 +595,11 @@
         });
     }
 
+    // ===== FIX: Autocomplete only fills the text, does NOT auto-submit =====
     function selectSuggestion(value) {
         input.value = value;
         box.style.display = 'none';
+        // REMOVED: Auto-submit - user clicks search manually
     }
 
     document.addEventListener('click', function(e) {
