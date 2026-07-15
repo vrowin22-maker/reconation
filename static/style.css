@@ -511,3 +511,48 @@ input[type="password"]:focus {
 ::-webkit-scrollbar-thumb:hover {
     background: #f7c948;
 }
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    form {
+        padding: 0 15px;
+    }
+
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .card img {
+        height: 180px;
+    }
+
+    .card h3 {
+        font-size: 0.85rem;
+    }
+
+    .card p {
+        font-size: 0.75rem;
+    }
+
+    .card audio {
+        width: 100%;
+    }
+
+    .carousel-card {
+        min-width: 120px;
+    }
+
+    .carousel-card img {
+        width: 120px;
+        height: 180px;
+    }
+}

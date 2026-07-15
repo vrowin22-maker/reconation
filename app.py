@@ -663,3 +663,38 @@ if __name__ == '__main__':
 # #app.py tells Flask what to deliver back
 # #Flask delivers the results page to the browser
 # #Browser displays it
+# #app.py is the backend,which is the logic of what happen when We do an action
+# #html is the structure,like the button,texts,inputs
+# #css is what makes it pretty such as colours,layouts
+
+# from flask import Flask, render_template, request #render_template lets us load html files
+#                                                   #request let us read data the user send
+
+# TMDB_API_KEY = "db173039059c81787b2e9599100983ec"
+
+# app = Flask(__name__)
+
+# @app.route('/')  #when someone visits the homepage,runs the function below
+# def home():
+#     return render_template('index.html')  #index.html is the structure of the page running
+# #render_template search the templates folder for the index.html file,return 
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+# #Browser asks Flask "what do I show?"
+# #Flask processes it and returns index.html
+# #Browser receives it and displays it
+
+# #app.py is the instructions for flask.
+# #It tells Flask:
+# #what to deliver (index.html)
+# #when to deliver it (when someone visits /)
+# #where to deliver it next (when someone visits /recommend)
+
+
+# #From the index.html page,when someone click the button search
+# #User clicks Search → browser sends the data to /recommend
+# #app.py receives it and runs the recommend function
+# #app.py tells Flask what to deliver back
+# #Flask delivers the results page to the browser
+# #Browser displays it
